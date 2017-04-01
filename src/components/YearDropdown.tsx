@@ -18,6 +18,7 @@ export const YearDropdown = (props: YearDropdownProps) => {
                 value={props.selected}
                 onChange={(e) => {props.onChange(e.currentTarget.value)}}
             >
+                <option value="">Any</option>
                 {
                     R.range(from, to + 1)
                     .map((year) => year.toString())

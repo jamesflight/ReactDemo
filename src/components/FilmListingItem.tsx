@@ -11,4 +11,5 @@ export const FilmListingItem = (props: FilmListingItemProps) =>
             <h4 className="media-heading">{props.film['Title']}</h4>
             <p><strong>Year:</strong> {props.film["Year"]}</p>
         </div>
+        <hr/>
     </div>;

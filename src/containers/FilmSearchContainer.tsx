@@ -10,6 +10,7 @@ interface IFilmSearchContainerProps {
     selectedYear: string,
     searchTerm: string,
     films: Object[];
+    isLoading: boolean;
     selectYear: (year: string) => void,
     typeInSearchBox: (searchTerm: string) => void
 }
@@ -18,7 +19,8 @@ let mapStateToProps = (state: RootState) => {
     return {
         selectedYear: state.selectedYear,
         searchTerm: state.searchTerm,
-        films: state.films
+        films: state.films,
+        isLoading: state.isLoading
     }
 }
 
@@ -54,9 +56,13 @@ class FilmSearchContainer extends React.Component<IFilmSearchContainerProps, {}>
                         />
                     </div>
                 </div>
+                
                 <div className="row">
                     <div className="col-xs-12">
-                        <FilmList films={this.props.films} />
+                        <FilmList
+                            films={this.props.films}
+                            isLoading={this.props.isLoading}
+                        />
                     </div>
                 </div>
             </div>

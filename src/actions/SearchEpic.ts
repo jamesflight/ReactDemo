@@ -11,7 +11,6 @@ export function testEpic(action$: Observable<Action>, store: any): Observable<Ac
         .filter((action) => {
             return action.type === 'SELECT_YEAR' || action.type === 'TYPE_IN_SEARCH_BOX'
         })
-        .filter((action) => store.getState().searchTerm !== '')
         .debounceTime(250)
         .mergeMap((action) => 
             fetch(`http://www.omdbapi.com/?s=${store.getState().searchTerm}&y=${store.getState().selectedYear}`)

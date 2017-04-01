@@ -7081,7 +7081,6 @@ function testEpic(action$, store) {
         .filter(function (action) {
         return action.type === 'SELECT_YEAR' || action.type === 'TYPE_IN_SEARCH_BOX';
     })
-        .filter(function (action) { return store.getState().searchTerm !== ''; })
         .debounceTime(250)
         .mergeMap(function (action) {
         return fetch("http://www.omdbapi.com/?s=" + store.getState().searchTerm + "&y=" + store.getState().selectedYear);
@@ -7138,7 +7137,8 @@ var mapStateToProps = function (state) {
     return {
         selectedYear: state.selectedYear,
         searchTerm: state.searchTerm,
-        films: state.films
+        films: state.films,
+        isLoading: state.isLoading
     };
 };
 var mapDispatchToProps = function (dispatch) {
@@ -7168,7 +7168,7 @@ var FilmSearchContainer = (function (_super) {
                     React.createElement(YearDropdown_1.YearDropdown, { selected: this.props.selectedYear, onChange: this.props.selectYear }))),
             React.createElement("div", { className: "row" },
                 React.createElement("div", { className: "col-xs-12" },
-                    React.createElement(FilmList_1.FilmList, { films: this.props.films })))));
+                    React.createElement(FilmList_1.FilmList, { films: this.props.films, isLoading: this.props.isLoading })))));
     };
     return FilmSearchContainer;
 }(React.Component));
@@ -7185,9 +7185,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var R = __webpack_require__(50);
 var RootState = (function () {
     function RootState() {
-        this.selectedYear = "1900";
+        this.selectedYear = "";
         this.searchTerm = '';
         this.films = [];
+        this.isLoading = false;
     }
     return RootState;
 }());
@@ -7196,11 +7197,11 @@ exports.FilmSearchReducer = function (state, action) {
     if (state === void 0) { state = new RootState(); }
     switch (action.type) {
         case 'SELECT_YEAR':
-            return R.assoc('selectedYear', action.payload, state);
+            return R.pipe(R.assoc('selectedYear', action.payload), R.assoc('films', []), R.assoc('isLoading', true))(state);
         case 'TYPE_IN_SEARCH_BOX':
-            return R.assoc('searchTerm', action.payload, state);
+            return R.pipe(R.assoc('searchTerm', action.payload), R.assoc('films', []), R.assoc('isLoading', true))(state);
         case 'SEARCH_COMPLETED':
-            return R.assoc('films', action.films, state);
+            return R.pipe(R.assoc('films', action.films), R.assoc('isLoading', false))(state);
         default:
             return state;
     }
@@ -7223,7 +7224,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(15);
 var FilmListingItem_1 = __webpack_require__(160);
 exports.FilmList = function (props) {
-    return React.createElement("div", null, props.films.map(function (film) { return (React.createElement(FilmListingItem_1.FilmListingItem, { key: film['imdbID'], film: film })); }));
+    return React.createElement("div", { className: "panel panel-default" },
+        React.createElement("div", { className: "panel-body" },
+            props.films.map(function (film) { return (React.createElement(FilmListingItem_1.FilmListingItem, { key: film['imdbID'], film: film })); }),
+            props.films.length === 0 && !props.isLoading &&
+                React.createElement("div", { style: { textAlign: "center" } }, "No results"),
+            props.isLoading &&
+                React.createElement("div", { className: "loader" })));
 };
 
 
@@ -7244,7 +7251,8 @@ exports.FilmListingItem = function (props) {
             React.createElement("p", null,
                 React.createElement("strong", null, "Year:"),
                 " ",
-                props.film["Year"])));
+                props.film["Year"])),
+        React.createElement("hr", null));
 };
 
 
@@ -7277,11 +7285,13 @@ var to = 2017;
 exports.YearDropdown = function (props) {
     return (React.createElement("div", { className: "form-group" },
         React.createElement("label", null, "Year:"),
-        React.createElement("select", { className: "form-control", value: props.selected, onChange: function (e) { props.onChange(e.currentTarget.value); } }, R.range(from, to + 1)
-            .map(function (year) { return year.toString(); })
-            .map(function (year) {
-            return (React.createElement("option", { key: year, value: year }, year));
-        }))));
+        React.createElement("select", { className: "form-control", value: props.selected, onChange: function (e) { props.onChange(e.currentTarget.value); } },
+            React.createElement("option", { value: "" }, "Any"),
+            R.range(from, to + 1)
+                .map(function (year) { return year.toString(); })
+                .map(function (year) {
+                return (React.createElement("option", { key: year, value: year }, year));
+            }))));
 };
 
 
